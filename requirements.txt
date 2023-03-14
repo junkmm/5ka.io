@@ -1,0 +1,9 @@
+flask-jwt-extended
+flask-jwt-extended[asymmetric_crypto]
+flask
+flask-smorest
+python-dotenv
+sqlalchemy
+flask-sqlalchemy
+pymysql
+passlib
