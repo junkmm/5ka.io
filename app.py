@@ -1,7 +1,8 @@
 from flask import Flask  # 서버 구현을 위한 Flask 객체 import
 from flask_smorest import Api  # Api 구현을 위한 Api 객체 import
-from resources.user.signup import blp as SignupBlueprint
+from resources.user.user_signup_login import blp as SignupBlueprint
 from resources.user.team import blp as TeamBlueprint
+from resources.project.project import blp as Projectblueprint
 from db import db
 import models
 
@@ -20,6 +21,8 @@ def create_app():
 
     api.register_blueprint(SignupBlueprint)
     api.register_blueprint(TeamBlueprint)
+    api.register_blueprint(Projectblueprint)
+    
 
     db.init_app(app)
 
