@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from passlib.hash import pbkdf2_sha256
 from db import db
 from models import UserModel
+from service.jenkins import create_jenkins_user
 
 blp = Blueprint("user", __name__, description="user Operation")
 
@@ -31,13 +32,17 @@ class Team(MethodView):
         try:
             db.session.add(user)
             db.session.commit()
+
+            # Jenkins 사용자 추가하기
+            create_jenkins_user(user.user_id, signup_data["password"], user.email, user.name)
+
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
             abort(400, message="A name already exists.")
         except SQLAlchemyError:
             abort(500, message="An error occured creating the Team")
 
-        return {"message":"User Created succesfully"}, 201
+        return {"message":"User Created successfully"}, 201
 
 @blp.route("/api/v1/login")
 class Team(MethodView):
@@ -54,7 +59,7 @@ class Team(MethodView):
 
         # 로그인 성공시
         if user and pbkdf2_sha256.verify(login_data["password"], user.password):
-            return {"message":"Login succesfully","user_id":user.id,"team_id":user.team_id}, 201
+            return {"message":"Login successfully","user_id":user.id,"team_id":user.team_id}, 201
 
         # 로그인 실패 시
         abort(401, message="Invalid credentials.")

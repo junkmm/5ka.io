@@ -32,6 +32,10 @@ class ProjectList(MethodView):
         except SQLAlchemyError:
             abort(500, message="An error occured creating the Team")
 
+        # db에 프로젝트까지 넣었기 때문에 아래부터는 gitlab, Jenkins 등 namespace? 큰 단위를 생성하고 매핑하는 로직을 수행해야 함.
+        
+
+
         return {"message":"Project Created succesfully"}, 201
 
 @blp.route("/api/v1/projects/<string:team_id>")

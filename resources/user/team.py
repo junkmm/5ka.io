@@ -4,6 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from flask_smorest import Blueprint, abort
 from db import db
 from models import TeamModel
+from service.jenkins import create_team_and_call_jenkins_api
 
 blp = Blueprint("team", __name__, description="team blueprint")
 
@@ -21,6 +22,7 @@ class Team(MethodView):
         try:
             db.session.add(team)
             db.session.commit()
+            create_team_and_call_jenkins_api(team_data["name"])
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
             abort(400, message="A Team with that name already exists.")
