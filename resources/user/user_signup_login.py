@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from passlib.hash import pbkdf2_sha256
 from db import db
 from models import UserModel, TeamModel
+from service.gitlab import gitlab_create_user_and_join_group
 from service.jenkins import create_jenkins_user, role_bind_jenkins_user
 
 blp = Blueprint("user", __name__, description="user Operation")
@@ -38,6 +39,8 @@ class Team(MethodView):
             # Jenkins Role bind
             team = TeamModel.query.filter(TeamModel.id == signup_data["team_id"]).first()
             role_bind_jenkins_user(user.name,team.name)
+            gitlab_create_user_and_join_group(signup_data["user_id"],signup_data["email"],signup_data["password"],team.name)
+
 
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
