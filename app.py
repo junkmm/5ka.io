@@ -3,7 +3,7 @@ from flask_smorest import Api  # Api 구현을 위한 Api 객체 import
 from resources.user.user_signup_login import blp as SignupBlueprint
 from resources.user.team import blp as TeamBlueprint
 from resources.project.project import blp as Projectblueprint
-from db import db
+from db import create_default_team, db
 import models
 
 def create_app():
@@ -28,5 +28,5 @@ def create_app():
 
     with app.app_context():
         db.create_all()
-
+        create_default_team()
     return app

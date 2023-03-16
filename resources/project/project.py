@@ -36,9 +36,6 @@ class ProjectList(MethodView):
             abort(400, message="A project name already exists.")
         except SQLAlchemyError:
             abort(500, message="An error occured creating the Team")
-
-            
-
         return {"message":"Project Created succesfully"}, 201
 
 @blp.route("/api/v1/projects/<string:team_id>")
