@@ -1,0 +1,42 @@
+<flow-definition plugin="workflow-job@1254.v3f64639b_11dd">
+<actions/>
+<description/>
+<keepDependencies>false</keepDependencies>
+<properties>
+<com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.6.0">
+<gitLabConnection/>
+<jobCredentialId/>
+<useAlternativeCredential>false</useAlternativeCredential>
+</com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+<org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+<triggers>
+<com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.36.1">
+<spec/>
+</com.cloudbees.jenkins.GitHubPushTrigger>
+</triggers>
+</org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+</properties>
+<definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@3601.v9b_36a_d99e1cc">
+<scm class="hudson.plugins.git.GitSCM" plugin="git@5.0.0">
+<configVersion>2</configVersion>
+<userRemoteConfigs>
+<hudson.plugins.git.UserRemoteConfig>
+<url>http://gitlab-service.default.svc//{edit}</url>
+<credentialsId>gitlab-admin</credentialsId>
+</hudson.plugins.git.UserRemoteConfig>
+</userRemoteConfigs>
+<branches>
+<hudson.plugins.git.BranchSpec>
+<name>*/master</name>
+</hudson.plugins.git.BranchSpec>
+</branches>
+<doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+<submoduleCfg class="empty-list"/>
+<extensions/>
+</scm>
+<scriptPath>Jenkinsfile</scriptPath>
+<lightweight>true</lightweight>
+</definition>
+<triggers/>
+<disabled>false</disabled>
+</flow-definition>

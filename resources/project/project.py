@@ -3,7 +3,8 @@ from flask import jsonify, request
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from flask_smorest import Blueprint, abort
 from db import db
-from models import ProjectModel
+from models import ProjectModel, TeamModel
+from service.jenkins import jenkins_create_folder
 
 blp = Blueprint("project", __name__, description="project Operation")
 
@@ -26,15 +27,17 @@ class ProjectList(MethodView):
         try:
             db.session.add(project)
             db.session.commit()
+            #Jenkins Folder(Project) 생성
+            name = project_data["name"]
+            team = TeamModel.query.filter(TeamModel.id == project_data["team_id"]).first()
+            jenkins_create_folder(name,team.name)
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
             abort(400, message="A project name already exists.")
         except SQLAlchemyError:
             abort(500, message="An error occured creating the Team")
 
-        # db에 프로젝트까지 넣었기 때문에 아래부터는 gitlab, Jenkins 등 namespace? 큰 단위를 생성하고 매핑하는 로직을 수행해야 함.
-        
-
+            
 
         return {"message":"Project Created succesfully"}, 201
 
