@@ -8,6 +8,7 @@ from service.jenkins import create_team_and_call_jenkins_api
 
 blp = Blueprint("team", __name__, description="team blueprint")
 
+# 팀 생성
 @blp.route("/api/v1/team")
 class Team(MethodView):
     def post(self):
@@ -23,10 +24,11 @@ class Team(MethodView):
             db.session.add(team)
             db.session.commit()
             create_team_and_call_jenkins_api(team_data["name"])
+            team_q = TeamModel.query.filter(TeamModel.name == team_data["name"]).first()
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
             abort(400, message="A Team with that name already exists.")
         except SQLAlchemyError:
             abort(500, message="An error occured creating the Team")
 
-        return {"message":"Team Created succesfully"}, 201
+        return {"message":"Team Created succesfully","team_name":team.name,"team_id":team_q.id}, 201

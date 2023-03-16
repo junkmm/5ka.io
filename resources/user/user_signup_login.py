@@ -4,11 +4,11 @@ from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from passlib.hash import pbkdf2_sha256
 from db import db
-from models import UserModel
-from service.jenkins import create_jenkins_user
+from models import UserModel, TeamModel
+from service.jenkins import create_jenkins_user, role_bind_jenkins_user
 
 blp = Blueprint("user", __name__, description="user Operation")
-
+# 회원 가입
 @blp.route("/api/v1/signup")
 class Team(MethodView):
     def post(self):
@@ -35,6 +35,9 @@ class Team(MethodView):
 
             # Jenkins 사용자 추가하기
             create_jenkins_user(user.user_id, signup_data["password"], user.email, user.name)
+            # Jenkins Role bind
+            team = TeamModel.query.filter(TeamModel.id == signup_data["team_id"]).first()
+            role_bind_jenkins_user(user.name,team.name)
 
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
@@ -43,7 +46,7 @@ class Team(MethodView):
             abort(500, message="An error occured creating the Team")
 
         return {"message":"User Created successfully"}, 201
-
+# 로그인
 @blp.route("/api/v1/login")
 class Team(MethodView):
     def post(self):
