@@ -4,7 +4,6 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from flask_smorest import Blueprint, abort
 from db import db
 from models import TeamModel
-from service.jenkins import create_team_and_call_jenkins_api
 
 blp = Blueprint("team", __name__, description="team blueprint")
 
@@ -21,12 +20,11 @@ class Team(MethodView):
         try:
             db.session.add(team)
             db.session.commit()
+            team_q = TeamModel.query.filter(TeamModel.name == team_data["name"]).first()
             """
             team 생성 시 Jenkins Item Role을 생성하는 코드, 팀은 고정으로 박아둘 거기 떄문에 사용 안함
             create_team_and_call_jenkins_api(team_data["name"])
-            team_q = TeamModel.query.filter(TeamModel.name == team_data["name"]).first()
             """
-            
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
             abort(400, message="A Team with that name already exists.")
