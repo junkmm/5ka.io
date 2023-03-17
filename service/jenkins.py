@@ -57,6 +57,7 @@ def create_team_and_call_jenkins_api(team_name):
     if jenkins_response.status_code != 200:
         raise Exception("Failed to create Jenkins team")
 
+# /api/v1/project POST 요청으로 project 생성 시 Jenkins project folder 생성
 def jenkins_create_folder(name,team_name):
     # Jenkins API의 URL을 설정합니다.
     create_folder_url = f"{jenkins_url}/createItem?name={name}_{team_name}&mode=com.cloudbees.hudson.plugins.folder.Folder&from=&json={{}}"

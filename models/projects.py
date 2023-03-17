@@ -12,6 +12,7 @@ class ProjectModel(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=False)
     users = db.relationship("UserModel", back_populates="projects")
 
+    apps = db.relationship("AppModel", back_populates="projects", cascade="all,delete")
     def serialize(self):
         return {
             'id': self.id,

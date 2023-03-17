@@ -14,3 +14,4 @@ class UserModel(db.Model):
     # users 테이블에서 teams 모델을 참조한다.
     teams = db.relationship("TeamModel", back_populates="users")
     projects = db.relationship("ProjectModel", back_populates="users", lazy="dynamic")
+    apps = db.relationship("AppModel", back_populates="users")

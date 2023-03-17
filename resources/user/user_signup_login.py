@@ -38,9 +38,9 @@ class Team(MethodView):
             create_jenkins_user(user.user_id, signup_data["password"], user.email, user.name)
             # Jenkins Role bind
             team = TeamModel.query.filter(TeamModel.id == signup_data["team_id"]).first()
-            role_bind_jenkins_user(user.name,team.name)
+            role_bind_jenkins_user(user.user_id,team.name)
+            # GitLab User 추가, 그룹 가입
             gitlab_create_user_and_join_group(signup_data["user_id"],signup_data["email"],signup_data["password"],team.name)
-
 
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:

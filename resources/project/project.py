@@ -27,10 +27,13 @@ class ProjectList(MethodView):
         try:
             db.session.add(project)
             db.session.commit()
-            #Jenkins Folder(Project) 생성
+            """
+            #Jenkins Folder(Project) 생성, # Jenkins 프로젝트 개념은 사용하지 않기로 해서 주석 처리
             name = project_data["name"]
             team = TeamModel.query.filter(TeamModel.id == project_data["team_id"]).first()
             jenkins_create_folder(name,team.name)
+            """
+
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
             abort(400, message="A project name already exists.")
