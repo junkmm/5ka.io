@@ -32,7 +32,7 @@ def gitlab_create_user_and_join_group(name, email, password, group_name):
         return
 
     # 사용자 그룹에 추가하기
-    data = {'user_id': user_id, 'access_level': 20}
+    data = {'user_id': user_id, 'access_level': 30}
     response = requests.post(f'{GITLAB_URL}/api/v4/groups/{group_id}/members', headers=headers, json=data)
 
     if response.status_code == 201:
