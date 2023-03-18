@@ -3,7 +3,7 @@ from flask import jsonify, request
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from flask_smorest import Blueprint, abort
 from db import db
-from models import ProjectModel, TeamModel
+from models import ProjectModel, TeamModel, AppModel
 from service.jenkins import jenkins_create_folder
 
 blp = Blueprint("project", __name__, description="project Operation")
@@ -45,5 +45,12 @@ class ProjectList(MethodView):
 class Project(MethodView):
     def get(self, team_id):
         projects = ProjectModel.query.filter_by(team_id=team_id).all()
-        projects_json = [project.serialize() for project in projects]
+        projects_json = []
+        
+        for project in projects:
+            project_data = project.serialize()
+            app_count = db.session.query(AppModel).filter(AppModel.project_id == project.id).count()
+            project_data["app_count"] = app_count
+            projects_json.append(project_data)
+
         return jsonify(projects_json)

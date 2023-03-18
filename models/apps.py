@@ -15,3 +15,13 @@ class AppModel(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=False)
     users = db.relationship("UserModel", back_populates="apps")
     appsurl = db.relationship("AppUrlModel", back_populates="apps")
+    
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'type': self.type,
+            'description': self.description,
+            'project_id': self.project_id,
+            'user_id': self.user_id
+        }
