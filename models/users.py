@@ -7,7 +7,7 @@ class UserModel(db.Model):
     user_id = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(80), nullable=False)
-    email  = db.Column(db.String(80), nullable=False)
+    email  = db.Column(db.String(80), unique=True, nullable=False)
     # users 테이블에서 teams.id 컬럼을 FK로 사용한다.
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'), nullable=False, unique=False)
 

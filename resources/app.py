@@ -3,7 +3,8 @@ from flask import jsonify, request
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from flask_smorest import Blueprint, abort
 from db import db
-from models import ProjectModel, AppModel
+from models import ProjectModel, AppModel, UserModel
+from service.gitlab import gitlab_create_application_from_fork
 
 blp = Blueprint("app", __name__, description="app Operation")
 
@@ -26,6 +27,9 @@ class AppCreate(MethodView):
         try:
             db.session.add(app)
             db.session.commit()
+            #gitlab_repositort_fork
+            user = UserModel.query.filter(UserModel.id == app_data["user_id"]).first()
+            gitlab_create_application_from_fork(app_data["type"], app_data["name"], user.team_id)
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
             abort(400, message="A app Intergrity already exists.")

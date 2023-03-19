@@ -39,14 +39,14 @@ class ProjectList(MethodView):
             abort(400, message="A project name already exists.")
         except SQLAlchemyError:
             abort(500, message="An error occured creating the Team")
-        return {"message":"Project Created succesfully"}, 201
+        return {"message":"Project Created successfully"}, 201
 
 @blp.route("/api/v1/projects/<string:team_id>")
 class Project(MethodView):
     def get(self, team_id):
         projects = ProjectModel.query.filter_by(team_id=team_id).all()
         projects_json = []
-        
+
         for project in projects:
             project_data = project.serialize()
             app_count = db.session.query(AppModel).filter(AppModel.project_id == project.id).count()
