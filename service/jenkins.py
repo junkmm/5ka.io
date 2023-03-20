@@ -1,5 +1,7 @@
 import os
 import requests
+from db import db
+from models.apps_url import AppUrlModel
 
 headers = {"Content-Type": "application/x-www-form-urlencoded"}
 auth = ("root", "11fc0a375f9ed442743b505c89f984e8a5")
@@ -72,3 +74,33 @@ def jenkins_create_folder(name,team_name):
         print("Folder created successfully!")
     else:
         print(f"Failed to create folder: {response.text}")
+
+def jenkins_create_application_pipeline(team_name,application_name,gitlab_repository_name,app_id):
+    url = f"{jenkins_url}/job/5ka.io_{team_name}/createItem?name={application_name}_{team_name}"
+    xml_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resource", "job_template.xml")
+    # XML 파일 읽기
+    with open(xml_file_path, "r") as xml_file:
+        xml_data = xml_file.read().format(
+            gitlab_repository_name=f"{gitlab_repository_name}.git"
+        )
+
+    # 헤더 설정
+    headers = {
+        "Content-Type": "application/xml"
+    }
+
+    # Jenkins에 API 요청
+    response = requests.post(
+        url,
+        data=xml_data,
+        headers=headers,
+        auth=auth
+    )
+
+    #http://1.220.201.109:32344/job/5ka.io_dev/job/api-create-test11_dev/
+    created_pipeline_url = f"{jenkins_url}/job/5ka.io_{team_name}/job/{application_name}_{team_name}"
+
+    # AppUrlModel에 저장
+    app_url_record = AppUrlModel.query.filter(AppUrlModel.app_id == app_id).first()
+    app_url_record.jenkins = created_pipeline_url
+    db.session.commit()

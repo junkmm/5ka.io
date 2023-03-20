@@ -3,8 +3,10 @@ from flask import jsonify, request
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from flask_smorest import Blueprint, abort
 from db import db
-from models import ProjectModel, AppModel, UserModel
+from models import ProjectModel, AppModel, UserModel, AppUrlModel
+from models.teams import TeamModel
 from service.gitlab import gitlab_create_application_from_fork
+from service.jenkins import jenkins_create_application_pipeline
 
 blp = Blueprint("app", __name__, description="app Operation")
 
@@ -29,7 +31,11 @@ class AppCreate(MethodView):
             db.session.commit()
             #gitlab_repositort_fork
             user = UserModel.query.filter(UserModel.id == app_data["user_id"]).first()
-            gitlab_create_application_from_fork(app_data["type"], app_data["name"], user.team_id)
+            gitlab_create_application_from_fork(app_data["type"], app_data["name"], user.team_id, app.id)
+            #Jenkins pipeline create
+            appurl = AppUrlModel.query.filter(AppUrlModel.app_id == app.id).first()
+            team = TeamModel.query.filter(TeamModel.id == user.team_id).first()
+            jenkins_create_application_pipeline(team.name,app_data["name"],appurl.gitlab,app.id)
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
             abort(400, message="A app Intergrity already exists.")

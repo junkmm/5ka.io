@@ -1,6 +1,7 @@
 import requests
 import json
-
+from models.apps_url import AppUrlModel
+from db import db
 from models.teams import TeamModel
 
 GITLAB_URL = 'http://1.220.201.109:30835'
@@ -42,10 +43,11 @@ def gitlab_create_user_and_join_group(name, email, password, group_name):
     else:
         print('Failed to add user to group.')
 
-def gitlab_create_application_from_fork(type,app_name,team_id):
+def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     headers = {"PRIVATE-TOKEN": GITLAB_TOKEN}
     if type == "spring":
         # GitLab "Spring Template" 프로젝트 조회하여 ID 획득
+        # spring이면 template 이름이 Sprint_Template 여야 함.
         url = f"{GITLAB_URL}/api/v4/projects?search=Spring_Template"
         response = requests.get(url, headers=headers)
         project_id = response.json()[0]['id']
@@ -60,4 +62,16 @@ def gitlab_create_application_from_fork(type,app_name,team_id):
     url = f"{GITLAB_URL}/api/v4/projects/{project_id}/fork"
     data = {"namespace_path": team_name+"/source", "name": app_name, "path": app_name}
     response = requests.post(url, headers=headers, data=data)
+
+
+    new_app_url = AppUrlModel(
+        gitlab=f"{GITLAB_URL}/{team_name}/source/{app_name}",
+        jenkins="",  # Jenkins URL을 여기에 입력하십시오.
+        argocd="",  # ArgoCD URL을 여기에 입력하십시오.
+        kibana="",  # Kibana URL을 여기에 입력하십시오.
+        grafana="",  # Grafana URL을 여기에 입력하십시오.
+        app_id=app_id
+    )
+    db.session.add(new_app_url)
+    db.session.commit()
     return
