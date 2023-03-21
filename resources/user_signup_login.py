@@ -66,7 +66,7 @@ class Team(MethodView):
 
         # 로그인 성공시
         if user and pbkdf2_sha256.verify(login_data["password"], user.password):
-            return {"id":user.id,"team_id":user.team_id,"user_id":user.name,"team_name":team.name,"message":"Login successfully"}, 201
+            return {"id":user.id,"team_id":user.team_id,"name":user.name,"team_name":team.name,"user_id":user.user_id,"message":"Login successfully"}, 201
 
         # 로그인 실패 시
         abort(401, message="Invalid credentials.")
