@@ -45,24 +45,27 @@ def gitlab_create_user_and_join_group(name, email, password, group_name):
 
 def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     headers = {"PRIVATE-TOKEN": GITLAB_TOKEN}
-    if type == "spring":
-        # GitLab "Spring Template" 프로젝트 조회하여 ID 획득
-        # spring이면 template 이름이 Sprint_Template 여야 함.
-        url = f"{GITLAB_URL}/api/v4/projects?search=Spring_Template"
-        response = requests.get(url, headers=headers)
-        project_id = response.json()[0]['id']
-    else:
-        # 다른 타입일 경우, 프로젝트 ID 직접 입력
-        project_id = "your_project_id_here"
+    # GitLab "Spring Template" 프로젝트 조회하여 ID 획득
+    # spring이면 template 이름이 Sprint_Template 여야 함.
+    source_url = f"{GITLAB_URL}/api/v4/projects?search={type}_Template"
+    response = requests.get(source_url, headers=headers)
+    source_project_id = response.json()[0]['id']
+    # Helm Template ID 획득
+    helm_url = f"{GITLAB_URL}/api/v4/projects?search={type}_Helm_Template"
+    response = requests.get(helm_url, headers=headers)
+    helm_project_id = response.json()[0]['id']
 
     # team_id로 team명 추출하기
     team = TeamModel.query.filter(TeamModel.id == team_id).first()
     team_name = team.name
-    # Fork 요청 보내기
-    url = f"{GITLAB_URL}/api/v4/projects/{project_id}/fork"
+    # Source Fork 요청 보내기
+    url = f"{GITLAB_URL}/api/v4/projects/{source_project_id}/fork"
     data = {"namespace_path": team_name+"/source", "name": app_name, "path": app_name}
     response = requests.post(url, headers=headers, data=data)
-
+    # Helm Fork 요청 보내기
+    helm_url = f"{GITLAB_URL}/api/v4/projects/{helm_project_id}/fork"
+    helm_data = {"namespace_path": team_name+"/helm", "name": app_name, "path": app_name}
+    response = requests.post(helm_url, headers=headers, data=helm_data)
 
     new_app_url = AppUrlModel(
         gitlab=f"{GITLAB_URL}/{team_name}/source/{app_name}",

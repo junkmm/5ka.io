@@ -66,10 +66,4 @@ class Project(MethodView):
                     "projects":list(projects_json)
                 }
         )
-        result = []
-        result.append(
-            {
-                "project_content":list(result_json)
-            }
-        )
-        return jsonify(result)
+        return jsonify(result_json[0])

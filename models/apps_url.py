@@ -4,7 +4,8 @@ class AppUrlModel(db.Model):
     __tablename__ = "appsurl"
 
     id = db.Column(db.Integer, primary_key=True)
-    gitlab = db.Column(db.String(200), unique=False,nullable=False)
+    gitlab_source = db.Column(db.String(200), unique=False,nullable=False)
+    gitlab_helm = db.Column(db.String(200), unique=False,nullable=False)
     jenkins = db.Column(db.String(200),unique=False,nullable=False)
     argocd = db.Column(db.String(200),unique=False,nullable=False)
     kibana = db.Column(db.String(200),unique=False,nullable=False)
