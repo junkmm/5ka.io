@@ -74,3 +74,8 @@ class App(MethodView):
             del app_json["project_id"]
 
         return jsonify(result_json[0])
+
+@blp.route("/api/v1/application/<string:app_id>")
+class Application(MethodView):
+    def get(self, app_id):
+        pass

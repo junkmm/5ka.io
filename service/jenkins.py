@@ -4,8 +4,10 @@ from db import db
 from models.apps_url import AppUrlModel
 
 headers = {"Content-Type": "application/x-www-form-urlencoded"}
-auth = ("root", "11fc0a375f9ed442743b505c89f984e8a5")
-jenkins_url = "http://1.220.201.109:32344"
+jenkins_url = os.getenv("JENKINS_URL")
+jenkins_user = os.getenv("JENKINS_AUTH_ID")
+jenkins_token = os.getenv("JENKINS_AUTH_TOKEN")
+auth = (jenkins_user, jenkins_token)
 
 # /api/v1/signup POST 요청으로 User 생성 시 Jenkins의 사용자 생성
 def create_jenkins_user(username, password, email, fullname):
@@ -89,6 +91,7 @@ def jenkins_create_application_pipeline(team_name,application_name,gitlab_reposi
         "Content-Type": "application/xml"
     }
 
+    print(auth)
     # Jenkins에 API 요청
     response = requests.post(
         url,
@@ -96,6 +99,11 @@ def jenkins_create_application_pipeline(team_name,application_name,gitlab_reposi
         headers=headers,
         auth=auth
     )
+    # 호출 결과를 확인합니다.
+    if response.status_code == 200:
+        print("Folder created successfully!")
+    else:
+        print(f"Failed to create folder: {response.text}")
 
     #http://1.220.201.109:32344/job/5ka.io_dev/job/api-create-test11_dev/
     created_pipeline_url = f"{jenkins_url}/job/5ka.io_{team_name}/job/{application_name}_{team_name}"

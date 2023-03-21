@@ -1,2 +1,9 @@
 FLASK_APP=app
 FLASK_DEBUG=1
+DB_URL=mysql+pymysql://dbuser:1234@1.220.201.109:33306/5ka_jun
+JENKINS_HEADERS={"Content-Type": "application/x-www-form-urlencoded"}
+JENKINS_AUTH_ID=root
+JENKINS_AUTH_TOKEN=11fc0a375f9ed442743b505c89f984e8a5
+JENKINS_URL=http://1.220.201.109:32344
+GITLAB_URL=http://1.220.201.109:30835
+GITLAB_TOKEN=glpat-3FnTXSda_PsrxxdYGhmQ

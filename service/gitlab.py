@@ -3,9 +3,10 @@ import json
 from models.apps_url import AppUrlModel
 from db import db
 from models.teams import TeamModel
+import os
 
-GITLAB_URL = 'http://1.220.201.109:30835'
-GITLAB_TOKEN = 'glpat-3FnTXSda_PsrxxdYGhmQ'
+GITLAB_URL = os.getenv("GITLAB_URL")
+GITLAB_TOKEN = os.getenv("GITLAB_TOKEN")
 
 def gitlab_create_user_and_join_group(name, email, password, group_name):
 
