@@ -66,9 +66,10 @@ def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     helm_url = f"{GITLAB_URL}/api/v4/projects/{helm_project_id}/fork"
     helm_data = {"namespace_path": team_name+"/helm", "name": app_name, "path": app_name}
     response = requests.post(helm_url, headers=headers, data=helm_data)
-
+    # source, helm url 저장
     new_app_url = AppUrlModel(
-        gitlab=f"{GITLAB_URL}/{team_name}/source/{app_name}",
+        gitlab_source=f"{GITLAB_URL}/{team_name}/source/{app_name}",
+        gitlab_helm=f"{GITLAB_URL}/{team_name}/helm/{app_name}",
         jenkins="",  # Jenkins URL을 여기에 입력하십시오.
         argocd="",  # ArgoCD URL을 여기에 입력하십시오.
         kibana="",  # Kibana URL을 여기에 입력하십시오.
