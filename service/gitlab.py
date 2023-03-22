@@ -9,7 +9,7 @@ GITLAB_URL = os.getenv("GITLAB_URL")
 GITLAB_TOKEN = os.getenv("GITLAB_TOKEN")
 
 def gitlab_create_user_and_join_group(name, email, password, group_name):
-
+    print(name,email,password,group_name)
     headers = {"Content-Type": "application/json", "PRIVATE-TOKEN": GITLAB_TOKEN}
 
     # GitLab 사용자 생성하기
@@ -21,16 +21,16 @@ def gitlab_create_user_and_join_group(name, email, password, group_name):
         print(f"User creation failed with status code: {response.status_code}, and content: {response.content}")
         return
 
-    # group_name의 GID 조회하기
+    # team의 source subgroup GID 조회하기
     user_id = response.json()['id']
-    response = requests.get(f'{GITLAB_URL}/api/v4/groups?search={group_name}', headers=headers)
+    response = requests.get(f'{GITLAB_URL}/api/v4/groups/{group_name}', headers=headers)
 
     if response.status_code != 200:
         print(f"Failed to retrieve group {group_name} information.")
         return
 
     try:
-        group_id = response.json()[0]['id']
+        group_id = response.json()['id']
     except IndexError:
         print(f"Group with name {group_name} does not exist.")
         return
@@ -42,7 +42,7 @@ def gitlab_create_user_and_join_group(name, email, password, group_name):
     if response.status_code == 201:
         print('User added to group successfully!')
     else:
-        print('Failed to add user to group.')
+        print('Failed to add user to group.',response.url)
 
 def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     headers = {"PRIVATE-TOKEN": GITLAB_TOKEN}
@@ -51,7 +51,7 @@ def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     source_url = f"{GITLAB_URL}/api/v4/projects?search={type}_Template"
     response = requests.get(source_url, headers=headers)
     source_project_id = response.json()[0]['id']
-    
+
     # Helm Template ID 획득
     helm_url = f"{GITLAB_URL}/api/v4/projects?search={type}_Helm_Template"
     response = requests.get(helm_url, headers=headers)
