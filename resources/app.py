@@ -24,7 +24,10 @@ class AppCreate(MethodView):
         
         # user_id 의 id(fk)값을 저장하기 위해 쿼리 후 객체 저장
         u = UserModel.query.filter(UserModel.user_id == app_data["user_id"]).first()
-        
+        project = ProjectModel.query.filter(ProjectModel.id == app_data["project_id"]).first()
+
+        if u.team_id != project.team_id:
+            abort(400,message="Auth Error")
         # User변수에 입력받은 값 대입, password는 암호화 적용하기.
         #app = AppModel(**app_data)
         app = AppModel(
@@ -61,10 +64,14 @@ class App(MethodView):
             app_data = app.serialize()
             app_data["user_id"] = UserModel.query.filter_by(id=app.user_id).first().user_id
             apps_json.append(app_data)
+
         project = ProjectModel.query.filter(ProjectModel.id == project_id).first()
+        team = TeamModel.query.filter(project.team_id==TeamModel.id).first()
         result_json = []
         result_json.append(
             {
+                "team_id": team.id,
+                "team_name": team.name,
                 "project_id":project_id,
                 "project_name":project.name,
                 "applications":list(apps_json)
