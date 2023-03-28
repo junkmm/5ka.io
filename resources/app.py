@@ -52,7 +52,7 @@ class AppCreate(MethodView):
             jenkins_create_application_pipeline(team.name,app_data["name"],appurl.gitlab_source,app.id)
             # argocd application 배포하기
             sleep(20)
-            create_argocd_application(app_data["name"], app_data["type"], team.name)
+            create_argocd_application(app_data["name"], app_data["type"], team.name,app.id)
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
             abort(400, message="A app Intergrity already exists.")

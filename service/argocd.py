@@ -7,7 +7,7 @@ import os
 ARGO_URL = os.getenv("ARGO_URL")
 ARGO_TOKEN = os.getenv("ARGO_TOKEN")
 
-def create_argocd_application(app_name, app_type, team):
+def create_argocd_application(app_name, app_type, team, app_id):
     app = AppModel.query.filter(AppModel.name == app_name).first()
     appurl = AppUrlModel.query.filter(AppUrlModel.app_id == app.id).first()
     qteam = TeamModel.query.filter(TeamModel.name == team).first()
@@ -34,16 +34,9 @@ def create_argocd_application(app_name, app_type, team):
     create_application_url = f"{ARGO_URL}/api/v1/applications"
     print(json.dumps(data))
     response = requests.post(create_application_url, headers=headers, json=data, verify=False)
-    request = response.request
 
-    curl_cmd = f"curl -X {request.method}"
-
-    for header, value in request.headers.items():
-        curl_cmd += f" -H '{header}: {value}'"
-
-    if request.body:
-        curl_cmd += f" -d '{request.body.decode('utf-8')}'"
-
-    curl_cmd += f" '{request.url}'"
-
-    print(curl_cmd)
+    # AppUrlModel에 저장
+    argocd_url = f"{ARGO_URL}/applications/argocd/{app_name}?view=tree&resource="
+    app_url_record = AppUrlModel.query.filter(AppUrlModel.app_id == app_id).first()
+    app_url_record.argocd = argocd_url
+    db.session.commit()
