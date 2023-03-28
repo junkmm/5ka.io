@@ -46,6 +46,10 @@ def gitlab_create_user_and_join_group(name, email, password, group_name):
 
 def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     headers = {"PRIVATE-TOKEN": GITLAB_TOKEN}
+    project_access_data = {
+        "allowed_to_push": {"access_levels": [{"access_level": 30}]},
+        "allowed_force_push": {"access_levels": [{"access_level": 30}]}
+    }
     # GitLab "Spring Template" 프로젝트 조회하여 ID 획득
     # spring이면 template 이름이 Sprint_Template 여야 함.
     source_url = f"{GITLAB_URL}/api/v4/projects?search={type}_Template"
@@ -53,7 +57,7 @@ def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     source_project_id = response.json()[0]['id']
 
     # Helm Template ID 획득
-    helm_url = f"{GITLAB_URL}/api/v4/projects?search={type}_Helm_Template"
+    helm_url = f"{GITLAB_URL}/api/v4/projects?search=Helm_Template"
     response = requests.get(helm_url, headers=headers)
     helm_project_id = response.json()[0]['id']
 
@@ -63,13 +67,21 @@ def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
 
     # Source Fork 요청 보내기
     url = f"{GITLAB_URL}/api/v4/projects/{source_project_id}/fork"
-    data = {"namespace_path": team_name+"/source", "name": app_name, "path": app_name}
+    data = {"namespace_path": team_name+"/source", "name": app_name, "path": app_name, "visibility": "public"}
     response = requests.post(url, headers=headers, data=data)
+    # Source Forked Project의 branch 권한 수정 - 이거 해야 그룹 사용자가 push 가능
+    forked_source_project_id = response.json().get('id')
+    default_branch = response.json().get('default_brancd')
+    response = requests.patch(f"{GITLAB_URL}/api/v4/projects/{forked_source_project_id}/protected_branches/{default_branch}", headers=headers, json=data)
 
     # Helm Fork 요청 보내기
     helm_url = f"{GITLAB_URL}/api/v4/projects/{helm_project_id}/fork"
-    helm_data = {"namespace_path": team_name+"/helm", "name": app_name, "path": app_name}
+    helm_data = {"namespace_path": team_name+"/helm", "name": app_name, "path": app_name, "visibility": "public"}
     response = requests.post(helm_url, headers=headers, data=helm_data)
+    # Helm Forked Project의 branch 권한 수정 - 이거 해야 그룹 사용자가 push 가능
+    forked_helm_project_id = response.json().get('id')
+    default_branch = response.json().get('default_brancd')
+    response = requests.patch(f"{GITLAB_URL}/api/v4/projects/{forked_helm_project_id}/protected_branches/{default_branch}", headers=headers, json=data)
 
     # source, helm url 저장
     new_app_url = AppUrlModel(
@@ -83,4 +95,3 @@ def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     )
     db.session.add(new_app_url)
     db.session.commit()
-    return

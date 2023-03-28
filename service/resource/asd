@@ -1,0 +1,33 @@
+{
+    "apiVersion": "argoproj.io/v1alpha1", 
+    "kind": "Application", 
+    "metadata": {
+        "name": "jun-app-09"
+    }, 
+    "spec": {
+        "destination": {
+            "name": "dev-kubernetes-admin@dev-kubernetes", 
+            "namespace": "jun-app-09"
+            }, 
+        "source": {
+            "path": ".", 
+            "repoURL": "http://1.220.201.109:30835/dev/helm/jun-app-09", 
+            "targetRevision": "HEAD", 
+            "helm": {
+                "parameters": [
+                    {
+                        "name": "app_type", 
+                        "value": "spring"
+                    }
+                ]
+            }
+        }, 
+        "project": "dev", 
+        "syncPolicy": {
+            "automated": {
+                "prune": true, 
+                "selfHeal": true
+            }
+        }
+    }
+}

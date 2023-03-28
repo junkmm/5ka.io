@@ -27,7 +27,6 @@ def create_app():
     api.register_blueprint(Projectblueprint)
     api.register_blueprint(Appblueprint)
     
-
     db.init_app(app)
 
     with app.app_context():

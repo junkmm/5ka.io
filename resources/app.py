@@ -1,3 +1,4 @@
+from time import sleep
 from flask.views import MethodView
 from flask import jsonify, request
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
@@ -5,6 +6,7 @@ from flask_smorest import Blueprint, abort
 from db import db
 from models import ProjectModel, AppModel, UserModel, AppUrlModel
 from models.teams import TeamModel
+from service.argocd import create_argocd_application
 from service.gitlab import gitlab_create_application_from_fork
 from service.jenkins import jenkins_create_application_pipeline
 
@@ -48,6 +50,9 @@ class AppCreate(MethodView):
             appurl = AppUrlModel.query.filter(AppUrlModel.app_id == app.id).first()
             team = TeamModel.query.filter(TeamModel.id == u.team_id).first()
             jenkins_create_application_pipeline(team.name,app_data["name"],appurl.gitlab_source,app.id)
+            # argocd application 배포하기
+            sleep(20)
+            create_argocd_application(app_data["name"], app_data["type"], team.name)
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
             abort(400, message="A app Intergrity already exists.")

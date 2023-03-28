@@ -1,0 +1,31 @@
+{
+  "apiVersion": "argoproj.io/v1alpha1",
+  "kind": "Application",
+  "metadata": {
+    "name": "app-name"
+  },
+  "spec": {
+    "destination": {
+      "name": "team-cluster-endpoint-name",
+      "namespace": "namespace"
+    },
+    "source": {
+      "path": ".",
+      "repoURL": "gitlab-endpoint/team/helm/app-name.git",
+      "targetRevision": "HEAD",
+      "helm": {
+        "parameters": [
+          {
+            "name": "app_type",
+            "value": "type"
+          }
+        ]
+      }
+    },
+    "project": "team",
+    "syncPolicy": {
+      "manual": {
+      }
+    }
+  }
+}
