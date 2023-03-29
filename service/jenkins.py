@@ -78,6 +78,7 @@ def jenkins_create_folder(name,team_name):
     else:
         print(f"Failed to create folder: {response.text}")
 
+# jenkins pipeline 생성하기
 def jenkins_create_application_pipeline(team_name,application_name,gitlab_repository_name,app_id):
     url = f"{jenkins_url}/job/5ka.io_{team_name}/createItem?name={application_name}_{team_name}"
     xml_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resource", "job_template.xml")
@@ -114,8 +115,8 @@ def jenkins_create_application_pipeline(team_name,application_name,gitlab_reposi
     app_url_record.jenkins = created_pipeline_url
     db.session.commit()
 
-
-def jenkins_build_pipeline(team_name,app_name):
+# Jenkins pipeline 실행시키기
+def jenkins_buildwithparameter_pipeline(team_name,app_name):
     data = {'test': 'apitest1'}
     url = f"{jenkins_url}/job/5ka.io_{team_name}/job/{app_name}_{team_name}/buildWithParameters"
     response = requests.post(url, auth=auth, data=data)

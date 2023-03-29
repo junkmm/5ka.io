@@ -6,12 +6,12 @@ from db import db
 from models import ProjectModel, AppModel, UserModel, AppUrlModel
 from models.teams import TeamModel
 from service.gitlab import gitlab_create_application_from_fork
-from service.jenkins import jenkins_create_application_pipeline, jenkins_build_pipeline
+from service.jenkins import jenkins_create_application_pipeline, jenkins_buildwithparameter_pipeline
 from service.argocd import argoce_app_depoloy
 
 blp = Blueprint("app", __name__, description="app Operation")
 
-
+# application 생성하기
 @blp.route("/api/v1/app")
 class AppCreate(MethodView):
     def post(self):
@@ -56,6 +56,7 @@ class AppCreate(MethodView):
             abort(500, message="An error occured creating the Team")
         return {"message":"Application Created successfully"}, 201
 
+# project에 상속된 application 목록 반환하기
 @blp.route("/api/v1/apps/<string:project_id>")
 class App(MethodView):
     def get(self, project_id):
@@ -85,7 +86,7 @@ class App(MethodView):
 
 # argocd application 배포하기
 @blp.route("/api/v1/argocd/<string:app_id>")
-class Application(MethodView):
+class ArgocdDeploy(MethodView):
     def get(self, app_id):
         app = AppModel.query.filter(AppModel.id == app_id).first()
         if app is not None:
@@ -95,12 +96,41 @@ class Application(MethodView):
         
 # jenkins job 실행시키기
 @blp.route("/api/v1/jenkins/<string:app_id>")
-class Application(MethodView):
+class JenkinsBuild(MethodView):
     def get(self, app_id):
         app = AppModel.query.filter(AppModel.id == app_id).first()
-        project = ProjectModel.query.filter(ProjectModel.id == app.project_id).first()
-        team = TeamModel.query.filter(TeamModel.id == project.team_id).first()
         if app is not None:
-            return jenkins_build_pipeline(team.name,app.name)
+            project = ProjectModel.query.filter(ProjectModel.id == app.project_id).first()
+            team = TeamModel.query.filter(TeamModel.id == project.team_id).first()
+            return jenkins_buildwithparameter_pipeline(team.name,app.name)
+        else:
+            abort (400,message="Application Not found")
+
+# application 상세 정보 반환하기
+@blp.route("/api/v1/application/<string:app_id>")
+class AppList(MethodView):
+    def get(self, app_id):
+        app = AppModel.query.filter(AppModel.id == app_id).first()
+        # gitlab_source url, gitlab_helm url, jenkins_url, argocd_url, grafana_url, kibana_url
+        if app is not None:
+            appurl = AppUrlModel.query.filter(AppUrlModel.app_id == app_id).first()
+            project = ProjectModel.query.filter(ProjectModel.id == app.project_id).first()
+            team = TeamModel.query.filter(TeamModel.id == project.team_id).first()
+            result_json = []
+            result_json.append(
+                {
+                    "team_id": team.id,
+                    "team_name": team.name,
+                    "project_id":project.id,
+                    "project_name":project.name,
+                    "gitlab_source_url":appurl.gitlab_source,
+                    "gitlab_helm_url":appurl.gitlab_helm,
+                    "jenkins_url":appurl.jenkins,
+                    "argocd_url":appurl.argocd,
+                    "grafana_url":appurl.grafana,
+                    "kubana_url":appurl.kibana
+                }
+            )
+            return jsonify(result_json[0])
         else:
             abort (400,message="Application Not found")

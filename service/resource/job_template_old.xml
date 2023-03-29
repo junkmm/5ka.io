@@ -1,15 +1,5 @@
 <flow-definition plugin="workflow-job@1282.ve6d865025906">
-  <actions>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2118.v31fd5b_9944b_5"/>
-    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2118.v31fd5b_9944b_5">
-      <jobProperties/>
-      <triggers/>
-      <parameters>
-        <string>test</string>
-      </parameters>
-      <options/>
-    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
-  </actions>
+  <actions/>
   <description/>
   <keepDependencies>false</keepDependencies>
   <properties>
@@ -22,15 +12,6 @@
       <jobCredentialId/>
       <useAlternativeCredential>false</useAlternativeCredential>
     </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
-    <hudson.model.ParametersDefinitionProperty>
-      <parameterDefinitions>
-        <hudson.model.StringParameterDefinition>
-          <name>test</name>
-          <defaultValue>hello</defaultValue>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
-      </parameterDefinitions>
-    </hudson.model.ParametersDefinitionProperty>
   </properties>
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@3641.vf58904a_b_b_5d8">
     <scm class="hudson.plugins.git.GitSCM" plugin="git@5.0.0">
