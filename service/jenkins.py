@@ -2,6 +2,7 @@ import os
 import requests
 from db import db
 from models.apps_url import AppUrlModel
+from flask_smorest import abort
 
 headers = {"Content-Type": "application/x-www-form-urlencoded"}
 jenkins_url = os.getenv("JENKINS_URL")
@@ -112,3 +113,12 @@ def jenkins_create_application_pipeline(team_name,application_name,gitlab_reposi
     app_url_record = AppUrlModel.query.filter(AppUrlModel.app_id == app_id).first()
     app_url_record.jenkins = created_pipeline_url
     db.session.commit()
+
+
+def jenkins_build_pipeline(team_name,app_name):
+    data = {'test': 'apitest1'}
+    url = f"{jenkins_url}/job/5ka.io_{team_name}/job/{app_name}_{team_name}/buildWithParameters"
+    response = requests.post(url, auth=auth, data=data)
+    if response.status_code != 201:
+        abort(400, message="Build Error")
+    return {"message":"Build successfully"}, 201

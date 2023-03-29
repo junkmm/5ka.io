@@ -45,4 +45,4 @@ def argoce_app_depoloy(app_name):
     response = requests.post(deploy_app_url, headers=headers, verify=False)
     if response.status_code != 200:
         abort(400, message="Deploy Error")
-    return {"message":"Deploy succesfully"}, 201
+    return {"message":"Deploy successfully"}, 201

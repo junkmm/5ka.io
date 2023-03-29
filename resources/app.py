@@ -6,7 +6,7 @@ from db import db
 from models import ProjectModel, AppModel, UserModel, AppUrlModel
 from models.teams import TeamModel
 from service.gitlab import gitlab_create_application_from_fork
-from service.jenkins import jenkins_create_application_pipeline
+from service.jenkins import jenkins_create_application_pipeline, jenkins_build_pipeline
 from service.argocd import argoce_app_depoloy
 
 blp = Blueprint("app", __name__, description="app Operation")
@@ -54,7 +54,7 @@ class AppCreate(MethodView):
             abort(400, message="A app Intergrity already exists.")
         except SQLAlchemyError:
             abort(500, message="An error occured creating the Team")
-        return {"message":"Application Created succesfully"}, 201
+        return {"message":"Application Created successfully"}, 201
 
 @blp.route("/api/v1/apps/<string:project_id>")
 class App(MethodView):
@@ -88,10 +88,19 @@ class App(MethodView):
 class Application(MethodView):
     def get(self, app_id):
         app = AppModel.query.filter(AppModel.id == app_id).first()
-        return argoce_app_depoloy(app.name)
+        if app is not None:
+            return argoce_app_depoloy(app.name)
+        else:
+            abort (400,message="Application Not found")
         
-
+# jenkins job 실행시키기
 @blp.route("/api/v1/jenkins/<string:app_id>")
 class Application(MethodView):
-    def get(app_id):
-        pass
+    def get(self, app_id):
+        app = AppModel.query.filter(AppModel.id == app_id).first()
+        project = ProjectModel.query.filter(ProjectModel.id == app.project_id).first()
+        team = TeamModel.query.filter(TeamModel.id == project.team_id).first()
+        if app is not None:
+            return jenkins_build_pipeline(team.name,app.name)
+        else:
+            abort (400,message="Application Not found")
