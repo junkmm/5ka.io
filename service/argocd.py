@@ -1,11 +1,16 @@
 import requests
 import json
 from db import db
+from flask_smorest import abort
 from models import TeamModel,AppModel,AppUrlModel
 import os
 
 ARGO_URL = os.getenv("ARGO_URL")
 ARGO_TOKEN = os.getenv("ARGO_TOKEN")
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": ARGO_TOKEN
+}
 
 def create_argocd_application(app_name, app_type, team, app_id):
     app = AppModel.query.filter(AppModel.name == app_name).first()
@@ -14,11 +19,6 @@ def create_argocd_application(app_name, app_type, team, app_id):
 
     team_cluster_endpoint_name = qteam.k8s_cluster_name_for_argo
     helm_url = appurl.gitlab_helm
-
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": ARGO_TOKEN
-    }
 
     xml_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resource", "argo_application_template.json")
     with open(xml_file_path, "r") as file:
@@ -32,7 +32,6 @@ def create_argocd_application(app_name, app_type, team, app_id):
     data["spec"]["project"] = team
 
     create_application_url = f"{ARGO_URL}/api/v1/applications"
-    print(json.dumps(data))
     response = requests.post(create_application_url, headers=headers, json=data, verify=False)
 
     # AppUrlModel에 저장
@@ -40,3 +39,10 @@ def create_argocd_application(app_name, app_type, team, app_id):
     app_url_record = AppUrlModel.query.filter(AppUrlModel.app_id == app_id).first()
     app_url_record.argocd = argocd_url
     db.session.commit()
+
+def argoce_app_depoloy(app_name):
+    deploy_app_url = f"{ARGO_URL}/api/v1/applications/{app_name}/sync"
+    response = requests.post(deploy_app_url, headers=headers, verify=False)
+    if response.status_code != 200:
+        abort(400, message="Deploy Error")
+    return {"message":"Deploy succesfully"}, 201

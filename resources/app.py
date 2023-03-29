@@ -1,4 +1,3 @@
-from time import sleep
 from flask.views import MethodView
 from flask import jsonify, request
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
@@ -6,9 +5,9 @@ from flask_smorest import Blueprint, abort
 from db import db
 from models import ProjectModel, AppModel, UserModel, AppUrlModel
 from models.teams import TeamModel
-from service.argocd import create_argocd_application
 from service.gitlab import gitlab_create_application_from_fork
 from service.jenkins import jenkins_create_application_pipeline
+from service.argocd import argoce_app_depoloy
 
 blp = Blueprint("app", __name__, description="app Operation")
 
@@ -50,9 +49,6 @@ class AppCreate(MethodView):
             appurl = AppUrlModel.query.filter(AppUrlModel.app_id == app.id).first()
             team = TeamModel.query.filter(TeamModel.id == u.team_id).first()
             jenkins_create_application_pipeline(team.name,app_data["name"],appurl.gitlab_source,app.id)
-            # argocd application 배포하기
-            sleep(20)
-            create_argocd_application(app_data["name"], app_data["type"], team.name,app.id)
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:
             abort(400, message="A app Intergrity already exists.")
@@ -87,7 +83,15 @@ class App(MethodView):
 
         return jsonify(result_json[0])
 
-@blp.route("/api/v1/application/<string:app_id>")
+# argocd application 배포하기
+@blp.route("/api/v1/argocd/<string:app_id>")
 class Application(MethodView):
     def get(self, app_id):
+        app = AppModel.query.filter(AppModel.id == app_id).first()
+        return argoce_app_depoloy(app.name)
+        
+
+@blp.route("/api/v1/jenkins/<string:app_id>")
+class Application(MethodView):
+    def get(app_id):
         pass

@@ -1,9 +1,11 @@
+import time
 import requests
 import json
 from models.apps_url import AppUrlModel
 from db import db
 from models.teams import TeamModel
 import os
+from service.argocd import create_argocd_application
 
 GITLAB_URL = os.getenv("GITLAB_URL")
 GITLAB_TOKEN = os.getenv("GITLAB_TOKEN")
@@ -46,6 +48,23 @@ def gitlab_create_user_and_join_group(name, email, password, group_name):
 
 def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     headers = {"PRIVATE-TOKEN": GITLAB_TOKEN}
+    # team_id로 team명 추출하기
+    team = TeamModel.query.filter(TeamModel.id == team_id).first()
+    team_name = team.name
+
+    # source, helm url 저장
+    new_app_url = AppUrlModel(
+        gitlab_source=f"{GITLAB_URL}/{team_name}/source/{app_name}",
+        gitlab_helm=f"{GITLAB_URL}/{team_name}/helm/{app_name}",
+        jenkins="",  # Jenkins URL을 여기에 입력하십시오.
+        argocd="",  # ArgoCD URL을 여기에 입력하십시오.
+        kibana="",  # Kibana URL을 여기에 입력하십시오.
+        grafana="",  # Grafana URL을 여기에 입력하십시오.
+        app_id=app_id
+    )
+    db.session.add(new_app_url)
+    db.session.commit()
+
     project_access_data = {
         "allowed_to_push": {"access_levels": [{"access_level": 30}]},
         "allowed_force_push": {"access_levels": [{"access_level": 30}]}
@@ -61,10 +80,6 @@ def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     response = requests.get(helm_url, headers=headers)
     helm_project_id = response.json()[0]['id']
 
-    # team_id로 team명 추출하기
-    team = TeamModel.query.filter(TeamModel.id == team_id).first()
-    team_name = team.name
-
     # Source Fork 요청 보내기
     url = f"{GITLAB_URL}/api/v4/projects/{source_project_id}/fork"
     data = {"namespace_path": team_name+"/source", "name": app_name, "path": app_name, "visibility": "public"}
@@ -72,7 +87,7 @@ def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     # Source Forked Project의 branch 권한 수정 - 이거 해야 그룹 사용자가 push 가능
     forked_source_project_id = response.json().get('id')
     default_branch = response.json().get('default_brancd')
-    response = requests.patch(f"{GITLAB_URL}/api/v4/projects/{forked_source_project_id}/protected_branches/{default_branch}", headers=headers, json=data)
+    response = requests.patch(f"{GITLAB_URL}/api/v4/projects/{forked_source_project_id}/protected_branches/{default_branch}", headers=headers, json=project_access_data)
 
     # Helm Fork 요청 보내기
     helm_url = f"{GITLAB_URL}/api/v4/projects/{helm_project_id}/fork"
@@ -81,17 +96,20 @@ def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     # Helm Forked Project의 branch 권한 수정 - 이거 해야 그룹 사용자가 push 가능
     forked_helm_project_id = response.json().get('id')
     default_branch = response.json().get('default_brancd')
-    response = requests.patch(f"{GITLAB_URL}/api/v4/projects/{forked_helm_project_id}/protected_branches/{default_branch}", headers=headers, json=data)
+    response = requests.patch(f"{GITLAB_URL}/api/v4/projects/{forked_helm_project_id}/protected_branches/{default_branch}", headers=headers, json=project_access_data)
 
-    # source, helm url 저장
-    new_app_url = AppUrlModel(
-        gitlab_source=f"{GITLAB_URL}/{team_name}/source/{app_name}",
-        gitlab_helm=f"{GITLAB_URL}/{team_name}/helm/{app_name}",
-        jenkins="",  # Jenkins URL을 여기에 입력하십시오.
-        argocd="",  # ArgoCD URL을 여기에 입력하십시오.
-        kibana="",  # Kibana URL을 여기에 입력하십시오.
-        grafana="",  # Grafana URL을 여기에 입력하십시오.
-        app_id=app_id
-    )
-    db.session.add(new_app_url)
-    db.session.commit()
+    # forked helm repository가 준비 됐는지 확인하고, 준비 되면 argo app 올리기
+    # Job ID로 상태 조회하기
+    import_status = 'created'
+    while import_status != 'finished':
+        response = requests.get(f'{GITLAB_URL}/api/v4/projects/{forked_helm_project_id}', headers=headers)
+        if response.status_code != 200:
+            print('Failed to get job status')
+            return
+        import_status = response.json().get('import_status')
+        if import_status == 'finished':
+            # repository URL이 이 시점에서 생성되어 반환됩니다.
+            create_argocd_application(app_name, type, team_name, app_id)
+        else:
+            # 5초마다 상태를 확인합니다.
+            time.sleep(0.5)
