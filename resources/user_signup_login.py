@@ -62,11 +62,14 @@ class Team(MethodView):
             abort(400, message="id or password is blank.")
 
         user = UserModel.query.filter(UserModel.user_id == login_data["user_id"]).first()
-        team = TeamModel.query.filter(TeamModel.id==user.team_id).first()
+        if user is not None:
+            team = TeamModel.query.filter(TeamModel.id==user.team_id).first()
 
-        # 로그인 성공시
-        if user and pbkdf2_sha256.verify(login_data["password"], user.password):
-            return {"id":user.id,"team_id":user.team_id,"name":user.name,"team_name":team.name,"user_id":user.user_id,"message":"Login successfully"}, 201
+            # 로그인 성공시
+            if user and pbkdf2_sha256.verify(login_data["password"], user.password):
+                return {"id":user.id,"team_id":user.team_id,"name":user.name,"team_name":team.name,"user_id":user.user_id,"message":"Login successfully"}, 201
 
-        # 로그인 실패 시
-        abort(401, message="Invalid credentials.")
+            # 로그인 실패 시
+            abort(401, message="Invalid credentials.")
+        else:
+            abort (401,message="Invalid credentials.")
