@@ -1,13 +1,14 @@
 import os
 import requests
 from db import db
-from models.apps_url import AppUrlModel
+from models import AppUrlModel, TeamModel, UserModel, ProjectModel, AppModel
 from flask_smorest import abort
 
 headers = {"Content-Type": "application/x-www-form-urlencoded"}
 jenkins_url = os.getenv("JENKINS_URL")
 jenkins_user = os.getenv("JENKINS_AUTH_ID")
 jenkins_token = os.getenv("JENKINS_AUTH_TOKEN")
+container_repository = os.getenv("CONTAINER_REPOSITORY_IMAGE_NAME")
 auth = (jenkins_user, jenkins_token)
 
 # /api/v1/signup POST 요청으로 User 생성 시 Jenkins의 사용자 생성
@@ -117,7 +118,22 @@ def jenkins_create_application_pipeline(team_name,application_name,gitlab_reposi
 
 # Jenkins pipeline 실행시키기
 def jenkins_buildwithparameter_pipeline(team_name,app_name):
-    data = {'test': 'apitest1'}
+    app = AppModel.query.filter(AppModel.name == app_name).first()
+    user = UserModel.query.filter(UserModel.id == app.user_id).first()
+    appurl = AppUrlModel.query.filter(AppUrlModel.app_id == app.id).first()
+    data = {
+        # user 정보 - 이름, 이메일
+        # gitlab url 정보 - source.git helm.git, non-http_helm.git
+        # docker hum repository - 고정(로컬 실행 시 docker repository, EKS 실행 시 EKS 주소) -> 환경변수 처리 필요
+        'gitlabName': user.user_id,
+        'gitlabEmail':user.email,
+        'gitlabWebaddress': f"{appurl.gitlab_source}.git",
+        'githelmaddress':f"{appurl.gitlab_helm}.git",
+        'githelmshortddress':f"{appurl.gitlab_helm.replace('http://','')}.git",
+        'gitlabCredential':'git_cre',
+        'dockerHubRegistry':container_repository,
+        'dockerHubRegistryCredential':'docker_cre',
+    }
     url = f"{jenkins_url}/job/5ka.io_{team_name}/job/{app_name}_{team_name}/buildWithParameters"
     response = requests.post(url, auth=auth, data=data)
     if response.status_code != 201:

@@ -128,7 +128,7 @@ class AppList(MethodView):
                     "jenkins_url":appurl.jenkins,
                     "argocd_url":appurl.argocd,
                     "grafana_url":appurl.grafana,
-                    "kubana_url":appurl.kibana
+                    "kibana_url":appurl.kibana
                 }
             )
             return jsonify(result_json[0])
