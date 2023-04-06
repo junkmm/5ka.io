@@ -6,6 +6,7 @@ from models import TeamModel,AppModel,AppUrlModel
 import os
 
 ARGO_URL = os.getenv("ARGO_URL")
+ARGO_EXT_URL = os.getenv("ARGO_EXT_URL")
 ARGO_TOKEN = os.getenv("ARGO_TOKEN")
 headers = {
     "Content-Type": "application/json",
@@ -34,8 +35,10 @@ def create_argocd_application(app_name, app_type, team, app_id):
     create_application_url = f"{ARGO_URL}/api/v1/applications"
     response = requests.post(create_application_url, headers=headers, json=data, verify=False)
 
+    print(response.headers,response.json(),response.request,response.status_code)
+
     # AppUrlModel에 저장
-    argocd_url = f"{ARGO_URL}/applications/argocd/{app_name}?view=tree&resource="
+    argocd_url = f"{ARGO_EXT_URL}/applications/argocd/{app_name}?view=tree&resource="
     app_url_record = AppUrlModel.query.filter(AppUrlModel.app_id == app_id).first()
     app_url_record.argocd = argocd_url
     db.session.commit()

@@ -5,6 +5,7 @@ from resources.team import blp as TeamBlueprint
 from resources.project import blp as Projectblueprint
 from resources.app import blp as Appblueprint
 from db import create_default_team, db
+from dotenv import load_dotenv # gunicorn 실행용 환경변수 추가
 import os
 import models
 
@@ -18,18 +19,15 @@ def create_app():
     app.config["OPENAPI_SWAGGER_UI_PATH"] = "/swagger-ui"
     app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DB_URL")
-
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     api = Api(app)  # Flask 객체에 Api 객체 등록
-
     api.register_blueprint(SignupBlueprint)
     api.register_blueprint(TeamBlueprint)
     api.register_blueprint(Projectblueprint)
     api.register_blueprint(Appblueprint)
-    
     db.init_app(app)
-
     with app.app_context():
         db.create_all()
         create_default_team()
+
     return app

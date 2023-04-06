@@ -6,6 +6,7 @@ from flask_smorest import abort
 
 headers = {"Content-Type": "application/x-www-form-urlencoded"}
 jenkins_url = os.getenv("JENKINS_URL")
+jenkins_ext_url = os.getenv("JENKINS_EXT_URL")
 jenkins_user = os.getenv("JENKINS_AUTH_ID")
 jenkins_token = os.getenv("JENKINS_AUTH_TOKEN")
 container_repository = os.getenv("CONTAINER_REPOSITORY_IMAGE_NAME")
@@ -21,7 +22,7 @@ def create_jenkins_user(username, password, email, fullname):
         "email": email,
         "fullname": fullname
     }
-    response = requests.post(url, headers=headers, data=data, auth=auth)
+    response = requests.post(url, headers=headers, data=data, auth=auth, verify=False)
     
     if response.status_code != 200:
         raise Exception("Failed to create Jenkins user")
@@ -36,7 +37,7 @@ def role_bind_jenkins_user(username, teamname):
         "roleName": teamname,
         "sid": username
     }
-    response1 = requests.post(url, data=data1, auth=auth)
+    response1 = requests.post(url, data=data1, auth=auth, verify=False)
 
     # globalRoles 추가
     data2 = {
@@ -44,7 +45,7 @@ def role_bind_jenkins_user(username, teamname):
         "roleName": "developer",
         "sid": username
     }
-    response2 = requests.post(url, data=data2, auth=auth)
+    response2 = requests.post(url, data=data2, auth=auth, verify=False)
 
 # /api/v1/team POST 요청으로 Team 생성 시 Jenkins Item Role 생성
 def create_team_and_call_jenkins_api(team_name):
@@ -58,7 +59,7 @@ def create_team_and_call_jenkins_api(team_name):
         "permissionIds": "hudson.model.Credentials.Create,hudson.model.Credentials.Delete,hudson.model.Credentials.ManageDomains,hudson.model.Credentials.Update,hudson.model.Credentials.View,hudson.model.Item.Build,hudson.model.Item.Cancel,hudson.model.Item.Configure,hudson.model.Item.Create,hudson.model.Item.Move,hudson.model.Item.Read,hudson.model.Item.Workspace,hudson.model.Run.Update,hudson.scm.Tag",
         "overwrite": "true"
     }
-    jenkins_response = requests.post(jenkins_api_url, data=jenkins_api_data, auth=auth)
+    jenkins_response = requests.post(jenkins_api_url, data=jenkins_api_data, auth=auth, verify=False)
 
     if jenkins_response.status_code != 200:
         raise Exception("Failed to create Jenkins team")
@@ -72,7 +73,7 @@ def jenkins_create_folder(name,team_name):
     # XML 파일을 읽어옵니다.
     with open(xml_file_path, "r") as f:
         xml = f.read()
-    response = requests.post(create_folder_url, auth=auth, headers={"Content-Type": "application/xml"}, data=xml)
+    response = requests.post(create_folder_url, auth=auth, headers={"Content-Type": "application/xml"}, data=xml, verify=False)
     # 호출 결과를 확인합니다.
     if response.status_code == 200:
         print("Folder created successfully!")
@@ -100,7 +101,8 @@ def jenkins_create_application_pipeline(team_name,application_name,gitlab_reposi
         url,
         data=xml_data,
         headers=headers,
-        auth=auth
+        auth=auth,
+        verify=False
     )
     # 호출 결과를 확인합니다.
     if response.status_code == 200:
@@ -108,8 +110,7 @@ def jenkins_create_application_pipeline(team_name,application_name,gitlab_reposi
     else:
         print(f"Failed to create folder: {response.text}")
 
-    #http://1.220.201.109:32344/job/5ka.io_dev/job/api-create-test11_dev/
-    created_pipeline_url = f"{jenkins_url}/job/5ka.io_{team_name}/job/{application_name}_{team_name}"
+    created_pipeline_url = f"{jenkins_ext_url}/job/5ka.io_{team_name}/job/{application_name}_{team_name}"
 
     # AppUrlModel에 저장
     app_url_record = AppUrlModel.query.filter(AppUrlModel.app_id == app_id).first()
@@ -129,13 +130,13 @@ def jenkins_buildwithparameter_pipeline(team_name,app_name):
         'gitlabEmail':user.email,
         'gitlabWebaddress': f"{appurl.gitlab_source}.git",
         'githelmaddress':f"{appurl.gitlab_helm}.git",
-        'githelmshortddress':f"{appurl.gitlab_helm.replace('http://','')}.git",
+        'githelmshortddress':f"{appurl.gitlab_helm.replace('https://','')}.git",
         'gitlabCredential':'git_cre',
         'dockerHubRegistry':container_repository,
         'dockerHubRegistryCredential':'docker_cre',
     }
     url = f"{jenkins_url}/job/5ka.io_{team_name}/job/{app_name}_{team_name}/buildWithParameters"
-    response = requests.post(url, auth=auth, data=data)
+    response = requests.post(url, auth=auth, data=data, verify=False)
     if response.status_code != 201:
         abort(400, message="Build Error")
     return {"message":"Build successfully"}, 201

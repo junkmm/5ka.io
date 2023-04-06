@@ -7,6 +7,7 @@ from db import db
 from models import UserModel, TeamModel
 from service.gitlab import gitlab_create_user_and_join_group
 from service.jenkins import create_jenkins_user, role_bind_jenkins_user
+from service.kibana import kibana_user_create
 
 blp = Blueprint("user", __name__, description="user Operation")
 # 회원 가입
@@ -33,7 +34,7 @@ class Team(MethodView):
         try:
             db.session.add(user)
             db.session.commit()
-
+            
             # Jenkins 사용자 추가하기
             create_jenkins_user(user.user_id, signup_data["password"], user.email, user.name)
             # Jenkins Role bind
@@ -41,6 +42,7 @@ class Team(MethodView):
             role_bind_jenkins_user(user.user_id,team.name)
             # GitLab User 추가, 그룹 가입
             gitlab_create_user_and_join_group(signup_data["user_id"],signup_data["email"],signup_data["password"],team.name)
+            kibana_user_create(user.user_id,signup_data["password"],team.name)
 
         # unique = true 여서 기존 data가 있으면 에러
         except IntegrityError:

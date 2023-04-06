@@ -11,7 +11,7 @@
             }, 
         "source": {
             "path": ".", 
-            "repoURL": "http://1.220.201.109:30835/dev/helm/jun-app-09", 
+            "repoURL": "https://1.220.201.109:30835/dev/helm/jun-app-09", 
             "targetRevision": "HEAD", 
             "helm": {
                 "parameters": [
