@@ -8,11 +8,11 @@ import os
 ARGO_URL = os.getenv("ARGO_URL")
 ARGO_EXT_URL = os.getenv("ARGO_EXT_URL")
 ARGO_TOKEN = os.getenv("ARGO_TOKEN")
+GITLAB_TOKEN = os.getenv("GITLAB_TOKEN")
 headers = {
     "Content-Type": "application/json",
     "Authorization": ARGO_TOKEN
 }
-
 def create_argocd_application(app_name, app_type, team, app_id):
     app = AppModel.query.filter(AppModel.name == app_name).first()
     appurl = AppUrlModel.query.filter(AppUrlModel.app_id == app.id).first()
@@ -20,6 +20,18 @@ def create_argocd_application(app_name, app_type, team, app_id):
 
     team_cluster_endpoint_name = qteam.k8s_cluster_name_for_argo
     helm_url = appurl.gitlab_helm
+
+    repository_data = {
+        "type":"git",
+        "project":team,
+        "repo":f"{helm_url}.git",
+        "username":"root",
+        "password":GITLAB_TOKEN
+    }
+    create_application_url = f"{ARGO_URL}/api/v1/repositories"
+    response = requests.post(create_application_url, headers=headers, json=repository_data, verify=False)
+    if response.status_code != 200:
+        print("Argocd Application Create Error")
 
     xml_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resource", "argo_application_template.json")
     with open(xml_file_path, "r") as file:

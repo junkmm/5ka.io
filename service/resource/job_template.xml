@@ -73,7 +73,7 @@
       <userRemoteConfigs>
         <hudson.plugins.git.UserRemoteConfig>
           <url>{gitlab_repository_name}</url>
-          <credentialsId>gitlab_root</credentialsId>
+          <credentialsId>git_cre</credentialsId>
         </hudson.plugins.git.UserRemoteConfig>
       </userRemoteConfigs>
       <branches>
