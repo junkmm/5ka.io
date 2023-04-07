@@ -55,13 +55,13 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>dockerHubRegistry</name>
-          <defaultValue>kimhj4270/5kaspring</defaultValue>
+          <name>ecrrepositoryCredential</name>
+          <defaultValue>aws_cre</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>dockerHubRegistryCredential</name>
-          <defaultValue>docker_cre</defaultValue>
+          <name>ecrrepository</name>
+          <defaultValue>https://963897741994.dkr.ecr.ap-northeast-2.amazonaws.com</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>

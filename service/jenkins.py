@@ -132,8 +132,8 @@ def jenkins_buildwithparameter_pipeline(team_name,app_name):
         'githelmaddress':f"{appurl.gitlab_helm}.git",
         'githelmshortddress':f"{appurl.gitlab_helm.replace('https://','')}.git",
         'gitlabCredential':'git_cre',
-        'dockerHubRegistry':container_repository,
-        'dockerHubRegistryCredential':'docker_cre',
+        'ecrrepositoryCredential':'aws_cre',
+        'ecrrepository':'https://963897741994.dkr.ecr.ap-northeast-2.amazonaws.com'
     }
     url = f"{jenkins_url}/job/5ka.io_{team_name}/job/{app_name}_{team_name}/buildWithParameters"
     response = requests.post(url, auth=auth, data=data, verify=False)
