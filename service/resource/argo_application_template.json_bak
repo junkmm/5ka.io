@@ -12,7 +12,15 @@
     "source": {
       "path": ".",
       "repoURL": "gitlab-endpoint/team/helm/app-name.git",
-      "targetRevision": "HEAD"
+      "targetRevision": "HEAD",
+      "helm": {
+        "parameters": [
+          {
+            "name": "app_type",
+            "value": "type"
+          }
+        ]
+      }
     },
     "project": "team",
     "syncPolicy": {

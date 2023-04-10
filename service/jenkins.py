@@ -118,8 +118,9 @@ def jenkins_create_application_pipeline(team_name,application_name,gitlab_reposi
     db.session.commit()
 
 # Jenkins pipeline 실행시키기
-def jenkins_buildwithparameter_pipeline(team_name,app_name):
-    app = AppModel.query.filter(AppModel.name == app_name).first()
+def jenkins_buildwithparameter_pipeline(team_name, app_name):
+    appname = app_name
+    app = AppModel.query.filter(AppModel.name == appname).first()
     user = UserModel.query.filter(UserModel.id == app.user_id).first()
     appurl = AppUrlModel.query.filter(AppUrlModel.app_id == app.id).first()
     data = {
@@ -133,10 +134,11 @@ def jenkins_buildwithparameter_pipeline(team_name,app_name):
         'githelmshortddress':f"{appurl.gitlab_helm.replace('https://','')}.git",
         'gitlabCredential':'git_cre',
         'ecrrepositoryCredential':'aws_cre',
-        'ecrrepository':'https://963897741994.dkr.ecr.ap-northeast-2.amazonaws.com'
+        'ecrrepository':'https://963897741994.dkr.ecr.ap-northeast-2.amazonaws.com',
+        'namespace': appname
     }
-    url = f"{jenkins_url}/job/5ka.io_{team_name}/job/{app_name}_{team_name}/buildWithParameters"
+    url = f"{jenkins_url}/job/5ka.io_{team_name}/job/{appname}_{team_name}/buildWithParameters"
     response = requests.post(url, auth=auth, data=data, verify=False)
     if response.status_code != 201:
         abort(400, message="Build Error")
-    return {"message":"Build successfully"}, 201
+    return

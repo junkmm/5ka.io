@@ -102,7 +102,8 @@ class JenkinsBuild(MethodView):
         if app is not None:
             project = ProjectModel.query.filter(ProjectModel.id == app.project_id).first()
             team = TeamModel.query.filter(TeamModel.id == project.team_id).first()
-            return jenkins_buildwithparameter_pipeline(team.name,app.name)
+            jenkins_buildwithparameter_pipeline(team.name,app.name)
+            return {"message":"Build successfully"}, 201
         else:
             abort (400,message="Application Not found")
 
