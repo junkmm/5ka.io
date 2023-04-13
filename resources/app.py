@@ -11,9 +11,11 @@ from service.argocd import argoce_app_depoloy
 
 blp = Blueprint("app", __name__, description="app Operation")
 
-# application 생성하기
+
 @blp.route("/api/v1/app")
 class AppCreate(MethodView):
+    # /ap1/v1/app post 요청 처리
+    # web console에서 application 생성하기
     def post(self):
         app_data = request.json
 
@@ -27,10 +29,12 @@ class AppCreate(MethodView):
         u = UserModel.query.filter(UserModel.user_id == app_data["user_id"]).first()
         project = ProjectModel.query.filter(ProjectModel.id == app_data["project_id"]).first()
 
+        # 만약 A팀의 프로젝트에서 B 유저가 애플리케이션을 생성한다고 했을 때
+        # B 유저가 A팀에 소속되었는지 검증한다. 만약 팀이 다른경우 Auth Error를 뱉는다.
         if u.team_id != project.team_id:
             abort(400,message="Auth Error")
-        # User변수에 입력받은 값 대입, password는 암호화 적용하기.
-        #app = AppModel(**app_data)
+
+        # app 변수에 DB저장 데이터 저장
         app = AppModel(
             name=app_data["name"],
             type=app_data["type"],
@@ -43,9 +47,9 @@ class AppCreate(MethodView):
         try:
             db.session.add(app)
             db.session.commit()
-            #gitlab_repositort_fork
+            # 깃랩 애플리케이션 생성 함수 호출
             gitlab_create_application_from_fork(app_data["type"], app_data["name"], u.team_id, app.id)
-            #Jenkins pipeline create
+            # 젠킨스 파이프라인 생성 함수 호출
             appurl = AppUrlModel.query.filter(AppUrlModel.app_id == app.id).first()
             team = TeamModel.query.filter(TeamModel.id == u.team_id).first()
             jenkins_create_application_pipeline(team.name,app_data["name"],appurl.gitlab_source,app.id)
@@ -56,9 +60,10 @@ class AppCreate(MethodView):
             abort(500, message="An error occured creating the Team")
         return {"message":"Application Created successfully"}, 201
 
-# project에 상속된 application 목록 반환하기
+
 @blp.route("/api/v1/apps/<string:project_id>")
 class App(MethodView):
+    # project에 상속된 application 목록 반환하기
     def get(self, project_id):
         apps = AppModel.query.filter_by(project_id=project_id).all()
         apps_json = []
@@ -84,9 +89,10 @@ class App(MethodView):
 
         return jsonify(result_json[0])
 
-# argocd application 배포하기
+
 @blp.route("/api/v1/argocd/<string:app_id>")
 class ArgocdDeploy(MethodView):
+    # argocd application 배포하기
     def get(self, app_id):
         app = AppModel.query.filter(AppModel.id == app_id).first()
         if app is not None:
@@ -94,11 +100,13 @@ class ArgocdDeploy(MethodView):
         else:
             abort (400,message="Application Not found")
         
-# jenkins job 실행시키기
+
 @blp.route("/api/v1/jenkins/<string:app_id>")
 class JenkinsBuild(MethodView):
+    # jenkins job 실행시키기
     def get(self, app_id):
         app = AppModel.query.filter(AppModel.id == app_id).first()
+        # get으로 요청받은 Application이 DB에 있는지 확인, 있으면 해당 젠킨스 파이프라인 빌드 진행
         if app is not None:
             project = ProjectModel.query.filter(ProjectModel.id == app.project_id).first()
             team = TeamModel.query.filter(TeamModel.id == project.team_id).first()
@@ -107,9 +115,9 @@ class JenkinsBuild(MethodView):
         else:
             abort (400,message="Application Not found")
 
-# application 상세 정보 반환하기
 @blp.route("/api/v1/application/<string:app_id>")
 class AppList(MethodView):
+    # application 상세 정보 반환하기
     def get(self, app_id):
         app = AppModel.query.filter(AppModel.id == app_id).first()
         # gitlab_source url, gitlab_helm url, jenkins_url, argocd_url, grafana_url, kibana_url

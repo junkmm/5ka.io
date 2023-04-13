@@ -41,7 +41,8 @@ def create_argocd_application(app_name, app_type, team, app_id):
     data["spec"]["destination"]["name"] = team_cluster_endpoint_name
     data["spec"]["destination"]["namespace"] = app_name
     data["spec"]["source"]["repoURL"] = f"{helm_url}.git"
-    #data["spec"]["source"]["helm"]["parameters"][0]["value"] = app_type
+    data["spec"]["source"]["helm"]["parameters"][0]["value"] = app_type
+    data["spec"]["source"]["helm"]["parameters"][0]["value"] = f"nexus.ihp001.dev/{app_name}"
     data["spec"]["project"] = team
 
     create_application_url = f"{ARGO_URL}/api/v1/applications"

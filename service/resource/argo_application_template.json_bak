@@ -18,6 +18,10 @@
           {
             "name": "app_type",
             "value": "type"
+          },
+          {
+            "name": "repository",
+            "value": "repository_name"
           }
         ]
       }
