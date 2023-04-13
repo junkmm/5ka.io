@@ -133,7 +133,7 @@ def jenkins_buildwithparameter_pipeline(team_name, app_name):
         'githelmaddress':f"{appurl.gitlab_helm}.git",
         'githelmshortddress':f"{appurl.gitlab_helm.replace('https://','')}.git",
         'gitlabCredential':'git_cre',
-        'ecrrepositoryCredential':'aws_cre',
+        'ecrrepositoryCredential':'nexus_cre',
         'ecrrepository':'https://963897741994.dkr.ecr.ap-northeast-2.amazonaws.com',
         'namespace': appname
     }

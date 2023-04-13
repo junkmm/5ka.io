@@ -59,7 +59,7 @@ def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
         gitlab_source=f"{GITLAB_EXT_URL}/{team_name}/source/{app_name}",
         gitlab_helm=f"{GITLAB_EXT_URL}/{team_name}/helm/{app_name}",
         jenkins="",  # Jenkins URL을 여기에 입력하십시오.
-        argocd="",  # ArgoCD URL을 여기에 입력하십시오.
+        argocd="https://grafana.ihp001.dev",  # ArgoCD URL을 여기에 입력하십시오.
         kibana="https://kibanadashboard.ihp001.dev/app/discover#/?_g=()&_a=(columns:!(_source),filters:!(),index:e1321040-d8dd-11ed-86ed-1962963f7307,interval:auto,query:(language:kuery,query:''),sort:!())",  # Kibana URL을 여기에 입력하십시오.
         grafana="",  # Grafana URL을 여기에 입력하십시오.
         app_id=app_id
