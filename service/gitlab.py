@@ -54,13 +54,18 @@ def gitlab_create_application_from_fork(type,app_name,team_id,app_id):
     team = TeamModel.query.filter(TeamModel.id == team_id).first()
     team_name = team.name
 
+    #team에 따라 kibana url 분기
+    if team.name == 'dev':
+        kibana_url = "https://kibanadashboard.ihp001.dev/app/discover#/?_g=()&_a=(columns:!(_source),filters:!(),index:e1321040-d8dd-11ed-86ed-1962963f7307,interval:auto,query:(language:kuery,query:''),sort:!())"
+    else:
+        kibana_url = "https://kibanadashboard.ihp001.dev/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!f,value:10000),time:(from:now-1h,to:now))&_a=(columns:!(_source),filters:!(),index:'416efa70-db42-11ed-86ed-1962963f7307',interval:auto,query:(language:kuery,query:''),sort:!())"
     # source, helm url 저장
     new_app_url = AppUrlModel(
         gitlab_source=f"{GITLAB_EXT_URL}/{team_name}/source/{app_name}",
         gitlab_helm=f"{GITLAB_EXT_URL}/{team_name}/helm/{app_name}",
         jenkins="",  # Jenkins URL을 여기에 입력하십시오.
         argocd="",  # ArgoCD URL을 여기에 입력하십시오.
-        kibana="https://kibanadashboard.ihp001.dev/app/discover#/?_g=()&_a=(columns:!(_source),filters:!(),index:e1321040-d8dd-11ed-86ed-1962963f7307,interval:auto,query:(language:kuery,query:''),sort:!())",  # Kibana URL을 여기에 입력하십시오.
+        kibana=kibana_url,  # Kibana URL을 여기에 입력하십시오.
         grafana="https://grafana.ihp001.dev",  # Grafana URL을 여기에 입력하십시오.
         app_id=app_id
     )
