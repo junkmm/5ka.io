@@ -1,41 +1,5 @@
 # Backend 정리
 
-## 환경변수
-
-- .flaskenv
-    
-    ```bash
-    FLASK_APP=app
-    FLASK_DEBUG=1
-    
-    DEV_CLUSTER_NAME=arn:aws:eks:ap-northeast-2:963897741994:cluster/eks-ks5-app-dev
-    OPS_CLUSTER_NAME=arn:aws:eks:ap-northeast-2:963897741994:cluster/eks-ks5-app-dev
-    
-    DB_URL_LOCAL=mysql+pymysql://root:1234@127.0.0.1:3306/5ka_jun
-    DB_URL=mysql+pymysql://dbuser:1234@1.220.201.109:33306/5ka_jun
-    
-    JENKINS_HEADERS={"Content-Type": "application/x-www-form-urlencoded"}
-    JENKINS_AUTH_ID=root
-    JENKINS_AUTH_TOKEN=11e0aaa8681f96be4407a8c8a7a5457c13
-    JENKINS_URL=http://jenkins-service.jenkins.cluster.local:8080
-    CONTAINER_REPOSITORY_IMAGE_NAME=kimhj4270/5kaspring
-    
-    GITLAB_URL=http://gitlab-service.gitlab.cluster.local
-    GITLAB_TOKEN=glpat-N6iD__WvaKWA82J5iiNJ
-    
-    ARGO_URL=https://argocd-server.argocd.cluster.local
-    ARGO_TOKEN=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJhcGl1c2VyOmFwaUtleSIsIm5iZiI6MTY4MDc2ODMxOCwiaWF0IjoxNjgwNzY4MzE4LCJqdGkiOiJhZTEzZjc1Mi1iMzNiLTRhNTctYjgyNS02MWQ1YzJiZjY2MTQifQ.AwuopI58lWcudN2kqu8j8BtBVN_p_Mj1J08NWZFcw7s
-    
-    KIBANA_URL=http://elasticsearch-svc-lb.kube-logging.cluster.local:9200
-    KIBANA_USER=elastic
-    KIBANA_PWD=test123
-    
-    JENKINS_EXT_URL=https://jenkins.ihp001.dev
-    GITLAB_EXT_URL=https://gitlab.ihp001.dev
-    ARGO_EXT_URL=https://argocd.ihp001.dev
-    KIBANA_EXT_URL=https://kibanadashboard.ihp001.dev
-    ```
-    
 
 ## Workflow
 
